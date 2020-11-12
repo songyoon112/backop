@@ -12,12 +12,13 @@ app.use('/api', (req, res)=> res.json({username:'bryan'}));
 
 app.use('/receiveJSON', (req, res) => {
    
-   console.log(parseInt(req.body.currTime))
+   console.log(req.body.currTime)
    var time = req.body.currTime.split("-")
-   var fsName = time[0] + time[1] + parseInt(time[2]) + "stream.json";
+
+   var fsName = time[0] + time[1] + (parseInt(time[2]) +1 ) + "stream.json";
    console.log(fsName)
     fs.readFile('./stream_files/' + fsName, (err, data) =>{
-      
+     
         res.send(data)
     })
     

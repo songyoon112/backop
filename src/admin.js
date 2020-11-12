@@ -7,73 +7,74 @@ import pastCheck from './timecheck';
 
 
 
+
 class Admin extends Component
 {
     constructor(props){
         super(props);
             this.state ={
                 curr : new Date(),
+                controller : true,
                 days :  [],
                 items : [],
                 group : '',
                 data : [],
+             
             }
-            this.receiveJSON("0")
+            this.yesterday = function(d){ d.setDate(d.getDate()-1); return d}(new Date);
+            this.receiveJSON(this.yesterday);
             this.pickDate(this.state.curr)
     }
     
-    receiveJSON(nextDate){
-       
-        if(this.state.curr !== nextDate){
+    receiveJSON(nextDate){ //제일 첫번째로 작동하는 함수
+        var currTime = new Date(nextDate)
+      
+        console.log(currTime)
+        if(this.state.controller){
         fetch('http://localhost:3001/receiveJSON', {
+           
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              'currTime': this.state.curr,
+              'currTime': currTime,
             
             })
         })
         .then(res =>res.json())
         .then(data => {
-            for (let i = 0; i < data.length; i++) {
-              this.state.data.push(data[i])  
-            }
-         this.display_list();
+            this.setState({ 
+                data : data,
+            })
+           
         })
         }
       }
 
-    display_list(){ 
-    //선택날짜의 스케쥴 리스트 프린트
-    console.log(this.state.data)
-    this.state.items = [];
-        if( this.state.group !== "그룹0"){
-            for (let i = 0; i < this.state.data.length; i++) {
-                if(this.state.data[i].group === this.state.group)
-                this.state.items.push(this.state.data[i])
-            }
-        }
-        else{
-            for (let i = 0; i < this.state.data.length; i++) {
-                if(this.state.data[i].group === this.state.group)
-                this.state.items.push(this.state.data[i])
-            }
-        }
-    }
 
-    
     pickDate(e){
+        var e_time = e.toString()
+        console.log(e_time)
+        if(this.state.curr == e_time){
+            this.state.controller = false
+        }else{
+            this.state.controller = true
+        }
+        
+        this.receiveJSON(e_time);
+        
         //선택한 날짜의 일주일 달력 프린트
-        console.log('hello')
-        this.receiveJSON(e);
         var today = new Date()   
         var year = e.getFullYear();
         var month = e.getMonth();
         var day = e.getDate()
         var myDate = new Date(year, month, day, 0 ,0 ,0, 0)
-        this.setState({ curr : e })
+        
+        this.setState({
+            sendTime : e,
+            curr : e 
+        })
         this.state.days = [];
         for (let i = 0; i < 7; i++) {
          var setKey = "dateKey" + i
@@ -93,18 +94,41 @@ class Admin extends Component
                 ed.disabled = false //현재 혹은 미래시간에는 사용자가 내용수정 가능
             });
         }
-
-
+     
     }
     
     show_list(event){
         var groupID = "그룹" + event.target.options.selectedIndex 
-        this.setState({group : groupID})
+        this.display_list(groupID)
     }
 
+    display_list(groupID){ 
+        //선택날짜의 스케쥴 리스트 프린트
+        this.state.items = [];
+
+            if( this.state.group !== groupID){
+                for (let i = 0; i < this.state.data.length; i++) {
+                    if(this.state.data[i].group === groupID){
+                     
+                        this.state.items.push(this.state.data[i])
+                    }
+                }
+                this.setState({group : groupID})
+            }
+            else{
+                for (let i = 0; i < this.state.data.length; i++) {
+                    if(this.state.data[i].group === this.state.group){
+                        this.state.items.push(this.state.data[i])
+                    }
+                    
+                }
+                this.setState({group : groupID})
+            }
+        }
+    
+        
     show_detail(e){
-  
-        this.state.data[0].forEach(element => {
+        this.state.data.forEach(element => {
                 if(element.group === this.state.group)
                 {
                     if(element.date === e.target.parentNode.id){
@@ -125,7 +149,6 @@ class Admin extends Component
 
 
     render(){
- 
 
     const listitems = this.state.items.map((item, index) =>
     <tr key={index} id = {item.date} onClick = {e => this.show_detail(e)}>
@@ -161,9 +184,8 @@ class Admin extends Component
                 id = "datepicker"
                 selected={this.state.curr}      
                 onSelect = {e => this.pickDate(e)}
-                
                 onKeyDown = {e => e.nativeEvent.returnValue === false}
-                value = {this.state.curr}
+                
                 /*
                 onSelect={handleDateSelect} //when day is clicked
                 onChange={handleDateChange} //only when value has changed
