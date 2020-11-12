@@ -1,0 +1,22 @@
+p{
+    margin: 0 0 0 0;
+}
+#item_list td{
+   width:100px;
+    
+}
+#item_list p{
+   display:flex;
+}
+#item_list input{
+   margin-right: 30px;
+}
+#table1 td{
+  padding: 0;
+}
+#detail_table input{
+  width:500px;
+}
+#datepicker{
+  margin-left: 25px;
+}
