@@ -345,6 +345,7 @@ class Admin extends Component
                 <button onClick = {() => this.add_list()}>추가</button>
                 <button onClick = {() => this.remove_list()}>삭제</button>
                 <button onClick = {() => save_file(this.state.data, this.state.curr)}>저장</button>
+                <Copy curr = {this.state.curr}/>   
                 <table id = "list_table">
                    <tbody>
                     <tr>
@@ -362,7 +363,7 @@ class Admin extends Component
                     </tbody>
 
                 </table>
-                <Copy curr = {this.state.curr}/>    
+               
                 </div>
             </div>
         )

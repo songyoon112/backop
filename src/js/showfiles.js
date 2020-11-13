@@ -32,6 +32,18 @@ class Copy extends Component
         this.setState({ list : this.state.list })
 
     }
+    list_handler(){
+        this.setState({ 
+            list : this.state.list
+        })
+        var listStyle = document.getElementById("copy_list").style
+        if(listStyle.visibility === "hidden"){
+            listStyle.visibility = "visible"
+        }else{
+            listStyle.visibility = "hidden"
+        }
+    }
+
     render(){
         const lists = this.state.list.map((files, index) =>
         <p  key={files} id = {index} onClick={e => copy_file(this.props.curr, files)}>
@@ -41,9 +53,14 @@ class Copy extends Component
         console.log('h')
 
         return(
+          
+            <div >
+            <div>
+                <button onClick={e =>  this.list_handler()}>복사</button>
+            </div>
             <div id = "copy_list">
-               <button onClick={e => this.setState({ list : this.state.list })}>show list</button>
                {lists}
+               </div>
             </div>
         )
     }
