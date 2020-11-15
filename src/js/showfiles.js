@@ -28,14 +28,14 @@ class Copy extends Component
         })
         .then(res =>res.json())
         .then(data => {
-            console.log(this.state.list)
+          
             for (let i = 0; i < data.length; i++) {
                 this.state.list.push(data[i])
             }
            
         })
         this.setState({ list : this.state.list })
-        console.log(this.state.list)
+       
     }
 
     list_handler(){
@@ -78,7 +78,7 @@ class Copy extends Component
             {files} 
         </p> // 파일명을 누르면 선택된 날짜로 파일이 복사됨
         )
-        console.log('h')
+      
 
         return(
           

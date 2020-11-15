@@ -14,18 +14,19 @@ app.use(bodyParser.json());
 app.use('/api', (req, res)=> res.json({username:'bryan'}));
 
 app.use('/receiveJSON', (req, res) => {
-   console.log('hello')
+    console.log(req.body)
    var time = req.body.currTime.split("-")
    var fsName = time[0] + time[1] + (parseInt(time[2]) +1 ) + "stream.json";
    var path = './stream_files/' + fsName;
     if (fs.existsSync(path)) {
-        fs.readFile(path, (err, data) =>{   
-         res.send(data)
+        fs.readFile(path, (err, data) =>{
+        console.log('success')
+        res.send(data)
         })
     }else{
         fs.readFile('./stream_files/error.json', (err, data) =>{
-          
-          res.send(data)
+        console.log('fail')
+        res.send(data)
         })
     }
    

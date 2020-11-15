@@ -13,7 +13,6 @@ class Admin extends Component
     constructor(props){
        
         super(props);
-        console.log("컨스트")
             this.state ={
                 curr : new Date(),
                 controller : true,
@@ -34,40 +33,38 @@ class Admin extends Component
 
 
     receiveJSON(nextDate){ //제일 첫번째로 작동하는 함수
-        console.log(nextDate)
-        var currTime = new Date(nextDate)
+        
         if(this.state.controller){
-        fetch('http://localhost:3001/receiveJSON', {
-           
+        fetch('http://localhost:3001/receiveJSON', {     
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              'currTime': currTime,
+              'currTime': nextDate,
             
             })
         })
         .then(res =>res.json())
         .then(data => {
-            console.log(data)
-            if(data[0].error == "아직 해당 날짜의 스케쥴이 존재하지 않습니다."){
+            
+            if(data[0].error === "아직 해당 날짜의 스케쥴이 존재하지 않습니다."){
                 alert(data[0].error)
                 delete data[0]["error"]
                 this.setState({ 
+                    items: [],
                     data : data,
-                   
                 })
-              
+               
             }else{
                 this.setState({ 
+                    items: [],
                     data : data,
-                   
                 })
               
                
             }
-            this.show_list(0)
+      
         })
         }
       }
@@ -87,12 +84,14 @@ class Admin extends Component
         var month = e.getMonth();
         var day = e.getDate()
         var myDate = new Date(year, month, day, 0 ,0 ,0, 0)
-        this.receiveJSON(e_time);
+        
         this.setState({
-            curr : e
+            curr : e,
+            group : "전체"
         })
         
         var p_check = pastCheck(today, e);
+        this.receiveJSON(myDate)
         this.dispalyDays(myDate)
         var editable_input = document.getElementsByClassName("editable_input"); 
         if( p_check === true){
@@ -122,7 +121,8 @@ class Admin extends Component
     }
 
     show_list(index){
-        console.log(this.state.data)
+   
+        
         this.state.items = []; //데이터 배열에서 리스트를 출력할 그룹만 선택하여 item배열로 push한다.
         var groupID = "그룹" + index
         if(index > 0){
@@ -189,8 +189,6 @@ class Admin extends Component
             for (let i = 0; i < this.state.data.length; i++) {
                 
                 if(item_add.group === this.state.data[i].group){
-                    console.log(item_add.date)
-                    console.log(this.state.data[i].date)
                     if(item_add.date === this.state.data[i].date){
                       
                         return alert("이미 설정된 스케쥴이 존재합니다.")
@@ -229,7 +227,6 @@ class Admin extends Component
         var message = this.checked_list.length + "개의 스케쥴을 삭제하시겠습니까?"
         var readdate = document.getElementById("date" + this.checked_list[0]).innerHTML
         if(this.state.data[0].date === readdate){
-            console.log("aa")
         }
         confirmAlert({
             title: 'Confirm to submit',
@@ -243,9 +240,7 @@ class Admin extends Component
                         var readgroup = document.getElementById("group" + this.checked_list[i]).innerHTML
                        for (let j = 0; j < this.state.data.length; j++) {
                            if(this.state.data[j].date === readdate){
-                            console.log('삭제성공')
                                if(this.state.data[j].group === readgroup){
-                                console.log('삭제성공')
                                    this.state.data.splice(j, 1)
                                }
                            }
@@ -254,7 +249,7 @@ class Admin extends Component
                         
                         
                     }
-                    console.log(this.state.data);
+
                     this.state.reviseControl = true;
                     alert('변경사항을 저장하려면 저장버튼을 누루세요');
                    this.show_list()
@@ -272,9 +267,12 @@ class Admin extends Component
 
     render(){
     if(this.state.firstRender){
-        this.receiveJSON(new Date())
+        var today = new Date()
+        today.setHours(0,0,0,0)
+        this.receiveJSON(today)
+        this.dispalyDays(today)
         this.state.firstRender = false
-        this.dispalyDays(new Date())
+      
     }
     console.log('난 렌더야')
     
@@ -302,7 +300,7 @@ class Admin extends Component
       //
         return(
         <div id="detailInfo" style = {{margin:0,}}>
-           <select onChange = {e => this.show_list(e.target.options.selectedIndex)} style={{cursor:"pointer"}} id="group_slector">
+           <select onChange = {e => this.show_list(e.target.options.selectedIndex)} value={this.state.group}  style={{cursor:"pointer"}} id="group_slector">
                 <option value ="그룹0">전체</option>
                 <option value ="그룹1">그룹1</option>
                 <option value ="그룹2">그룹2</option>
