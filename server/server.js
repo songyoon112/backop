@@ -7,13 +7,14 @@ const fs = require('fs');
 const { json } = require('body-parser');
 const { getJSON } = require('jquery');
 
+
 app.use(cors());
 
 app.use(bodyParser.json());
 app.use('/api', (req, res)=> res.json({username:'bryan'}));
 
 app.use('/receiveJSON', (req, res) => {
-   
+   console.log('hello')
    var time = req.body.currTime.split("-")
    var fsName = time[0] + time[1] + (parseInt(time[2]) +1 ) + "stream.json";
    var path = './stream_files/' + fsName;
@@ -30,8 +31,8 @@ app.use('/receiveJSON', (req, res) => {
    
 })
 
-app.use('/showlist', (req, res) => {
-    console.log('hi')
+app.get('/showlist', (req, res) => {
+    console.log('hey')
      fs.readdir('./stream_files', (err, data) =>{
          res.send(data)
      });

@@ -6,30 +6,35 @@ import 'moment-timezone';
 import pastCheck from './timecheck';
 import save_file from './js/saveFile';
 import { confirmAlert } from 'react-confirm-alert'; // Import
-import { data } from 'jquery';
 import Copy from './js/showfiles';
 
 class Admin extends Component
 {
     constructor(props){
+       
         super(props);
+        console.log("컨스트")
             this.state ={
                 curr : new Date(),
                 controller : true,
+                firstRender : true,
+                reviseControl : false,
                 days :  [],
                 items : [],
                 group : '',
                 data : [],
              
             }
-       this.checked_list = []; //,체크박스에서 표시된 아이디에 대한 배열
-        var time = ''
-            this.yesterday = function(d){ d.setDate(d.getDate()-1); return d}(new Date);
-            this.receiveJSON(this.yesterday);
-            this.pickDate(this.state.curr)
+        this.checked_list = []; //,체크박스에서 표시된 아이디에 대한 배열
+     
+        this.yesterday = function(d){ d.setDate(d.getDate()-1); return d}(new Date);
+       
     }
-    
+   
+
+
     receiveJSON(nextDate){ //제일 첫번째로 작동하는 함수
+        console.log(nextDate)
         var currTime = new Date(nextDate)
         if(this.state.controller){
         fetch('http://localhost:3001/receiveJSON', {
@@ -45,17 +50,21 @@ class Admin extends Component
         })
         .then(res =>res.json())
         .then(data => {
+            console.log(data)
             if(data[0].error == "아직 해당 날짜의 스케쥴이 존재하지 않습니다."){
                 alert(data[0].error)
+                delete data[0]["error"]
                 this.setState({ 
                     data : data,
-                    item : []
+                   
                 })
-                delete this.state.data[0]["error"]
+              
             }else{
                 this.setState({ 
                     data : data,
+                   
                 })
+              
                
             }
             this.show_list(0)
@@ -72,28 +81,21 @@ class Admin extends Component
             this.state.controller = true //다른날짜를 선택했으므로 데이터를 전송 받는다.
 
         }
-        
-        this.receiveJSON(e_time);
-        
         //선택한 날짜의 일주일 달력 프린트
         var today = new Date()   
         var year = e.getFullYear();
         var month = e.getMonth();
         var day = e.getDate()
         var myDate = new Date(year, month, day, 0 ,0 ,0, 0)
-        
+        this.receiveJSON(e_time);
         this.setState({
-            sendTime : e,
-            curr : e 
+            curr : e
         })
-        this.state.days = [];
-        for (let i = 0; i < 7; i++) {
-         var setKey = "dateKey" + i
-            this.state.days.push({ date: new Date(myDate.setDate(myDate.getDate() - myDate.getDay() + i)), key: setKey }) 
-          
-        }
+        
+        var p_check = pastCheck(today, e);
+        this.dispalyDays(myDate)
         var editable_input = document.getElementsByClassName("editable_input"); 
-        if(pastCheck(today, e) === true){
+        if( p_check === true){
             //선택한 날짜가 과거일 경우
             Array.prototype.forEach.call(editable_input, function(ed) {
                 // Do stuff here
@@ -108,22 +110,34 @@ class Admin extends Component
      
     }
     
+    dispalyDays(myDate){
+        
+        this.state.days = []; //일주일에 대한 정보를 컨트롤.
+        for (let i = 0; i < 7; i++) {
+            var setKey = "dateKey" + i
+               this.state.days.push({ date: new Date(myDate.setDate(myDate.getDate() - myDate.getDay() + i)), key: setKey }) 
+             
+           }
+
+    }
+
     show_list(index){
+        console.log(this.state.data)
         this.state.items = []; //데이터 배열에서 리스트를 출력할 그룹만 선택하여 item배열로 push한다.
         var groupID = "그룹" + index
         if(index > 0){
             document.getElementById("input_group").value  = groupID
             this.display_list(groupID)
+            this.setState({group : groupID})
         }
-        this.setState({group : groupID})
+        
     }
 
     display_list(groupID){ 
         //선택날짜의 스케쥴 리스트 프린트
             if( this.state.group !== groupID){
                 for (let i = 0; i < this.state.data.length; i++) {
-                    if(this.state.data[i].group === groupID){
-                     
+                    if(this.state.data[i].group === groupID){    
                         this.state.items.push(this.state.data[i])
                     }
                 }
@@ -157,6 +171,7 @@ class Admin extends Component
                 }
         });
     }
+
     add_list(){
         var item_add = {
                 'date' : document.getElementById("input_date").innerHTML,
@@ -182,6 +197,7 @@ class Admin extends Component
                     }
                 }
             }
+            this.state.reviseControl = true;
             this.state.data.push(item_add);
             this.display_list(item_add.group)
         }
@@ -238,7 +254,8 @@ class Admin extends Component
                         
                         
                     }
-                    console.log(this.state.data)
+                    console.log(this.state.data);
+                    this.state.reviseControl = true;
                     alert('변경사항을 저장하려면 저장버튼을 누루세요');
                    this.show_list()
                 }
@@ -254,7 +271,13 @@ class Admin extends Component
 
 
     render(){
+    if(this.state.firstRender){
+        this.receiveJSON(new Date())
+        this.state.firstRender = false
+        this.dispalyDays(new Date())
+    }
     console.log('난 렌더야')
+    
     const listitems = this.state.items.map((item, index) =>
     <tr key={index} id = {item.date} onClick = {e => this.show_detail(e)}>
     <td><input type="checkbox" style={{width:"30px"}}  id = {index} onClick ={e => this.box_check(e)}></input></td>
@@ -279,7 +302,7 @@ class Admin extends Component
       //
         return(
         <div id="detailInfo" style = {{margin:0,}}>
-           <select onChange = {e => this.show_list(e.target.options.selectedIndex)} id="group_slector">
+           <select onChange = {e => this.show_list(e.target.options.selectedIndex)} style={{cursor:"pointer"}} id="group_slector">
                 <option value ="그룹0">전체</option>
                 <option value ="그룹1">그룹1</option>
                 <option value ="그룹2">그룹2</option>
@@ -290,7 +313,7 @@ class Admin extends Component
                 selected={this.state.curr}      
                 onSelect = {e => this.pickDate(e)}
                 onKeyDown = {e => e.nativeEvent.returnValue === false}
-                
+           
                 /*
                 onSelect={handleDateSelect} //when day is clicked
                 onChange={handleDateChange} //only when value has changed
@@ -342,10 +365,12 @@ class Admin extends Component
                     </tr>
                     </tbody>
                 </table>
-                <button onClick = {() => this.add_list()}>추가</button>
-                <button onClick = {() => this.remove_list()}>삭제</button>
-                <button onClick = {() => save_file(this.state.data, this.state.curr)}>저장</button>
-                <Copy curr = {this.state.curr}/>   
+                <div style={{display:"flex", marginLeft:"800px"}}>
+                <p onClick = {() => this.add_list()} id="buttons" >추가</p>
+                <p onClick = {() => this.remove_list()} id="buttons" >삭제</p>
+                <p onClick = {() => save_file(this.state.data, this.state.curr)} id="buttons" >저장</p>
+                <Copy curr = {this.state.curr} reviseControl = {this.state.reviseControl} date={this.state.curr} />   
+                </div>
                 <table id = "list_table">
                    <tbody>
                     <tr>
