@@ -66,6 +66,7 @@ app.get('/showlist', (req, res) => {
         console.log(sendData[0])
         var a = "[" + sendData + "]"
         console.log(a)
+        res.send(a)
         // 파일을 read하고 날짜를 변환한 데이터를 선택한 날짜의 파일로 저장
          fs.writeFile("./stream_files/" + fsName, a , 'utf8', function (err) {
             if (err) {

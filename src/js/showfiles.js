@@ -69,12 +69,18 @@ class Copy extends Component
               }
             ]
           });
-      
+      this.props.action()
+      var listStyle = document.getElementById("copy_list").style
+      listStyle.visibility = "hidden"
     }
 
     render(){
         const lists = this.state.list.map((files, index) =>
-        <p  key={files} id = {index} onClick={e => this.Docopy(files)}> 
+        <p  key={files} id = {index} onClick = {e => {
+            this.Docopy(files)
+            
+        }}
+        > 
             {files} 
         </p> // 파일명을 누르면 선택된 날짜로 파일이 복사됨
         )

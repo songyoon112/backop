@@ -1,5 +1,5 @@
 function copy_file(Time ,fileName){
- 
+ var myData = [];
     
         fetch('http://localhost:3001/copy', {
            
@@ -13,7 +13,13 @@ function copy_file(Time ,fileName){
               'fileName' : fileName
             })
         })
-   
+        .then(res =>res.json())
+        .then(
+          data => {
+            console.log(data)
+        })
+        console.log(myData)
+   return myData[0]
 }
 
 export default copy_file

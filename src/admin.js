@@ -25,11 +25,15 @@ class Admin extends Component
              
             }
         this.checked_list = []; //,체크박스에서 표시된 아이디에 대한 배열
-     
+         this.handler = this.handler.bind(this)
         this.yesterday = function(d){ d.setDate(d.getDate()-1); return d}(new Date);
        
     }
-   
+   handler() {
+       this.setState({
+           firstRender : true
+       })
+   }
 
 
     receiveJSON(nextDate){ //제일 첫번째로 작동하는 함수
@@ -125,11 +129,11 @@ class Admin extends Component
         
         this.state.items = []; //데이터 배열에서 리스트를 출력할 그룹만 선택하여 item배열로 push한다.
         var groupID = "그룹" + index
-        if(index > 0){
+       
             document.getElementById("input_group").value  = groupID
             this.display_list(groupID)
             this.setState({group : groupID})
-        }
+        
         
     }
 
@@ -246,13 +250,13 @@ class Admin extends Component
                            }
                            
                        }
-                        
-                        
                     }
-
+                    
                     this.state.reviseControl = true;
-                    alert('변경사항을 저장하려면 저장버튼을 누루세요');
-                   this.show_list()
+                    alert('데이터가 삭제되었습니다.');
+                    this.checked_list = [];
+                    save_file(this.state.data, this.state.curr)
+                    this.show_list(0)
                 }
               },
               {
@@ -262,6 +266,12 @@ class Admin extends Component
             ]
           });
         }
+    }
+    saveprocess(){
+        save_file(this.state.data, this.state.curr)
+      
+        this.receiveJSON(this.state.curr)
+        this.show_list(0)
     }
 
 
@@ -366,8 +376,8 @@ class Admin extends Component
                 <div style={{display:"flex", marginLeft:"800px"}}>
                 <p onClick = {() => this.add_list()} id="buttons" >추가</p>
                 <p onClick = {() => this.remove_list()} id="buttons" >삭제</p>
-                <p onClick = {() => save_file(this.state.data, this.state.curr)} id="buttons" >저장</p>
-                <Copy curr = {this.state.curr} reviseControl = {this.state.reviseControl} date={this.state.curr} />   
+                <p onClick = {() => this.saveprocess() } id="buttons" >저장</p>
+                <Copy curr = {this.state.curr} reviseControl = {this.state.reviseControl} date={this.state.curr} action={this.handler}  />   
                 </div>
                 <table id = "list_table">
                    <tbody>
@@ -392,6 +402,7 @@ class Admin extends Component
         )
     }
 }
+
 
 
 
