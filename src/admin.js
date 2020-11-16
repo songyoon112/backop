@@ -301,7 +301,7 @@ class Admin extends Component
     )
 
     const listdays = this.state.days.map((day) =>
-        <p  key={day.key} id = {day.key} >
+        <p  key={day.key} id = {day.key} onClick = {e => this.pickDate(day.date)} style={{cursor:"pointer"}} >
         <Moment format="YYYY/MM/DD, dddd, "  >
             {day.date}
         </Moment>
